@@ -1,4 +1,4 @@
-# PaLM API Text demo
+# PaLM API Chat demo
 
 This demo is a Python Flask web app that uses the Google PaLM API for generative AI.
 
