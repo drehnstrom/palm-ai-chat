@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request
 import os
 import yaml
 import vertexai
@@ -55,8 +55,7 @@ examples=[
         )
     ]
      
-chat = chat_model.start_chat(context=CONTEXT)
-
+chat = chat_model.start_chat(context=CONTEXT, examples=examples)
 
 @app.route("/", methods = ['POST', 'GET'])
 def main():
