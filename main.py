@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 import os
 import yaml
 import vertexai
-from vertexai.language_models import TextGenerationModel
+from vertexai.preview.language_models import ChatModel, InputOutputTextPair
 
 app = Flask(__name__)
 
@@ -27,43 +27,55 @@ MAX_OUTPUT_TOKENS = get_config_value(config, 'palm', 'max_output_tokens', 256)
 TOP_P = get_config_value(config, 'palm', 'top_p', 0.8)
 TOP_K = get_config_value(config, 'palm', 'top_k', 40)
 
+vertexai.init(location="us-central1")
+chat_model = ChatModel.from_pretrained("chat-bison@001")
+parameters = {
+        "temperature": TEMPERATURE,
+        "max_output_tokens": MAX_OUTPUT_TOKENS,
+        "top_p": TOP_P,
+        "top_k": TOP_K
+     }
+     
+examples=[
+        InputOutputTextPair(
+            input_text="""When I turn my car on, there is a clicking noise. """,
+            output_text="""Did you try turning the engine off and back on again?"""
+        ),
+        InputOutputTextPair(
+            input_text="""My car broke down on the highway and it won\'t start. """,
+            output_text="""Text us you location and we will send a tow truck. The number is (123) 555-1234"""
+        ),
+        InputOutputTextPair(
+            input_text="""The check engine light is on when I start my car. """,
+            output_text="""Give us a call at (123) 555-1234 to speak to a technician. """
+        ),
+        InputOutputTextPair(
+            input_text="""I need to get my car inspected. """,
+            output_text="""Visit our web site at https://www.northpointgasandall.com. Click on the Appointments link to set up a date and time. """
+        )
+    ]
+     
+chat = chat_model.start_chat(context=CONTEXT)
 
 
 @app.route("/", methods = ['POST', 'GET'])
 def main():
     if request.method == 'POST':
         input = request.form['input']
-        response = get_response(input)
+        response, history = get_response(input)
     else: 
         input = ""
-        response = get_response("Who are you and what can you do?")
+        response, history = get_response("Who are you and what can you do?")
 
-    model = {"title": TITLE, "subtitle": SUBTITLE, "botname": BOTNAME, "message": response, "input": input}
+    model = {"title": TITLE, "subtitle": SUBTITLE, "botname": BOTNAME, "message": response, "input": input, "history": history}
     return render_template('index.html', model=model)
 
 
 def get_response(input):
-    vertexai.init(location="us-central1")
-    parameters = {
-        "temperature": TEMPERATURE,
-        "max_output_tokens": MAX_OUTPUT_TOKENS,
-        "top_p": TOP_P,
-        "top_k": TOP_K
-    }
-
-    model = TextGenerationModel.from_pretrained("text-bison@001")
-    request = """{0}.
-    
-    input: {1}
-    output:
-    """
-    response = model.predict(
-        request.format(CONTEXT, input),
-        **parameters
-    )
-    return response
+    response = chat.send_message(input, **parameters)
+    print(chat.message_history)
+    return response, chat.message_history
     
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
-    
