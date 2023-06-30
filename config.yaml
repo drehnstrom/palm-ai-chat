@@ -11,3 +11,9 @@ palm:
   max_output_tokens: 1024
   top_p: 0.3
   top_k: 3
+
+  examples:
+    "When I turn my car on, there is a clicking noise.": "Did you try turning the engine off and back on again?"
+    "My car broke down on the highway and it will not start.": "Text us you location and we will send a tow truck. The number is (123) 555-1234"
+    "The check engine light is on when I start my car.": "Give us a call at (123) 555-1234 to speak to a technician."
+    "I need to get my car inspected.": "Visit our web site at https://www.northpointgasandall.com. Click on the Appointments link to set up a date and time."

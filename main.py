@@ -27,6 +27,7 @@ MAX_OUTPUT_TOKENS = get_config_value(config, 'palm', 'max_output_tokens', 256)
 TOP_P = get_config_value(config, 'palm', 'top_p', 0.8)
 TOP_K = get_config_value(config, 'palm', 'top_k', 40)
 
+
 vertexai.init(location="us-central1")
 chat_model = ChatModel.from_pretrained("chat-bison@001")
 parameters = {
@@ -35,25 +36,9 @@ parameters = {
         "top_p": TOP_P,
         "top_k": TOP_K
      }
-     
-examples=[
-        InputOutputTextPair(
-            input_text="""When I turn my car on, there is a clicking noise. """,
-            output_text="""Did you try turning the engine off and back on again?"""
-        ),
-        InputOutputTextPair(
-            input_text="""My car broke down on the highway and it won\'t start. """,
-            output_text="""Text us you location and we will send a tow truck. The number is (123) 555-1234"""
-        ),
-        InputOutputTextPair(
-            input_text="""The check engine light is on when I start my car. """,
-            output_text="""Give us a call at (123) 555-1234 to speak to a technician. """
-        ),
-        InputOutputTextPair(
-            input_text="""I need to get my car inspected. """,
-            output_text="""Visit our web site at https://www.northpointgasandall.com. Click on the Appointments link to set up a date and time. """
-        )
-    ]
+
+EXAMPLES=get_config_value(config, 'palm', 'examples', [])
+examples = [InputOutputTextPair(input_text=k, output_text=v) for k,v in EXAMPLES.items()]
      
 chat = chat_model.start_chat(context=CONTEXT, examples=examples)
 
@@ -71,8 +56,8 @@ def main():
 
 
 def get_response(input):
-    response = chat.send_message(input, **parameters)
-    print(chat.message_history)
+    print(chat.send_message(input))
+    response = chat.send_message(input)
     return response, chat.message_history
     
 
