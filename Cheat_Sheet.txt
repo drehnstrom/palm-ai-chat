@@ -7,6 +7,6 @@ pip install -r requirements.txt
 
 
 # To build the image
-gcloud builds submit --tag=gcr.io/vertext-ai-dar/palm-chat:v0.2 .
+gcloud builds submit --tag=gcr.io/vertext-ai-dar/palm-chat:v0.3 .
 
 
